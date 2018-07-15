@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -15,9 +16,9 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("called")
 	b := r.Body
 	decoder := json.NewDecoder(b)
-	var data interface{}
+	var data []WebHookResult
 	decoder.Decode(&data)
-	log.Println(data)
+	fmt.Printf("%+v\n", data)
 }
 
 func main() {
@@ -37,12 +38,16 @@ type subscribeResult struct {
 	Id string `json:"id,omitempty"`
 }
 
+type WebHookResult struct {
+	Date int64    `json:"date,omitempty"`
+	Data TestData `json:"data,omitempty"`
+}
 type TestData struct {
-	D1 string
-	D2 TestData2
+	D1 string    `json:"d1,omitempty"`
+	D2 TestData2 `json:"d2,omitempty"`
 }
 type TestData2 struct {
-	D22 string
+	D22 string `json:"d22,omitempty"`
 }
 
 func dispatch() {

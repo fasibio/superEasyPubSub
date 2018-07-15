@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/fasibio/superEasyPubSub/properties"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
 
 	"github.com/gorilla/mux"
@@ -32,21 +33,40 @@ type deleteSubscribe struct {
 }
 
 type Dispatch = struct {
-	Date string      `json:"date,omitempty"`
+	Date int64       `json:"date,omitempty"`
 	Data interface{} `json:"data,omitempty"`
 }
 
-type Dispatchs struct {
-	dispatchs []Dispatch `json:"dispatchs,omitempty"`
-}
+// func (h handler) getAll(w http.ResponseWriter, r *http.Request) {
+// 	cur, err := h.db.Collection("data").Find(context.Background(), nil)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// 	defer cur.Close(context.Background())
+// 	var dispatchs []Dispatch
+// 	for cur.Next(context.Background()) {
+// 		var data Dispatch
+// 		bson.Reader
+// 		err := cur.DecodeBytes(&data)
+// 		if err != nil {
+// 			log.Println(err)
+// 		}
+// 		fmt.Printf("%+v\n", data)
+
+// 		// dispatchs = append(dispatchs, data)
+// 	}
+// 	byteJson, err := json.Marshal(&dispatchs)
+// 	w.Write(byteJson)
+// }
 
 func (h handler) dispatch(w http.ResponseWriter, r *http.Request) {
 	b := r.Body
 	decoder := json.NewDecoder(b)
 	var data interface{}
 	decoder.Decode(&data)
+	location, _ := time.LoadLocation(properties.GetTimezone())
 	d := Dispatch{
-		Date: time.Now().Format("20060102150405"),
+		Date: time.Now().In(location).Unix(),
 		Data: data,
 	}
 	_, err := h.db.Collection("data").InsertOne(context.Background(), d)
@@ -62,14 +82,14 @@ func (h handler) dispatch(w http.ResponseWriter, r *http.Request) {
 	var dispatchs []Dispatch
 	dispatchs = append(dispatchs, d)
 	byteData, _ := json.Marshal(&dispatchs)
-	reader := *bytes.NewReader(byteData)
+
 	for cur.Next(context.Background()) {
 		var subs subscriber
 		err := cur.Decode(&subs)
 		if err != nil {
 			log.Println(err)
 		}
-
+		reader := *bytes.NewReader(byteData)
 		http.Post(subs.Webhook, "application/json", &reader)
 		log.Println("Send data to :", subs.Webhook)
 	}
@@ -140,6 +160,7 @@ func main() {
 	r.HandleFunc("/subscribe", h.subscribe).Methods("POST")
 	r.HandleFunc("/subscribe/{id}", h.unsubscribe).Methods("DELETE")
 	r.HandleFunc("/dispatch", h.dispatch).Methods("POST")
+	// r.HandleFunc("/getAll", h.getAll).Methods("GET")
 	log.Println("Listen on port :8000")
 	log.Fatal(http.ListenAndServe(":8000", r))
 
