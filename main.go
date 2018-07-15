@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"log"
@@ -31,8 +32,12 @@ type deleteSubscribe struct {
 }
 
 type Dispatch = struct {
-	Date string
-	Data interface{}
+	Date string      `json:"date,omitempty"`
+	Data interface{} `json:"data,omitempty"`
+}
+
+type Dispatchs struct {
+	dispatchs []Dispatch `json:"dispatchs,omitempty"`
 }
 
 func (h handler) dispatch(w http.ResponseWriter, r *http.Request) {
@@ -54,13 +59,19 @@ func (h handler) dispatch(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 	defer cur.Close(context.Background())
+	var dispatchs []Dispatch
+	dispatchs = append(dispatchs, d)
+	byteData, _ := json.Marshal(&dispatchs)
+	reader := *bytes.NewReader(byteData)
 	for cur.Next(context.Background()) {
 		var subs subscriber
 		err := cur.Decode(&subs)
 		if err != nil {
 			log.Println(err)
 		}
-		log.Println(subs.Webhook)
+
+		http.Post(subs.Webhook, "application/json", &reader)
+		log.Println("Send data to :", subs.Webhook)
 	}
 
 }
