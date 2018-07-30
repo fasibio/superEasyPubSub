@@ -12,6 +12,10 @@ func GetTimezone() string {
 	return result
 }
 
+func GetMongoDbPath() string {
+	return getRequiredEnv("mongoDbPath")
+}
+
 func getRequiredEnv(env string) string {
 	result := os.Getenv(env)
 	if len(result) == 0 {

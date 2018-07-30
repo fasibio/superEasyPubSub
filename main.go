@@ -148,7 +148,7 @@ func (h handler) subscribe(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	client := getDbHandler("mongodb://localhost:27018")
+	client := getDbHandler(properties.GetMongoDbPath())
 
 	var h = handler{
 		client: client,

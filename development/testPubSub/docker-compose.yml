@@ -1,0 +1,13 @@
+version: '3'
+services: 
+  pubsub: 
+    restart: always
+    build: ../../.
+    expose:
+      - 8000
+    ports:
+      - 8000:8000
+    environment: 
+      - mongoDbPath=mongodb://mongodb:27017
+  mongodb: 
+    image: mongo
