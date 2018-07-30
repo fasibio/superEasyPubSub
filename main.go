@@ -129,6 +129,12 @@ type subscribeResult struct {
 	Id string `json:"id,omitempty"`
 }
 
+// func (h handler) listSubscribe(w http.ResponseWriter, r *http.Request) {
+// 	cur, err := h.db.Collection("subscriber").Find(context.Background(), nil)
+// 	defer cur.Close(context.Background())
+
+// }
+
 func (h handler) subscribe(w http.ResponseWriter, r *http.Request) {
 	b := r.Body
 	decoder := json.NewDecoder(b)
@@ -157,6 +163,8 @@ func main() {
 	log.Println("Starting Application")
 	r := mux.NewRouter()
 	r.HandleFunc("/", h.root).Methods("GET")
+	// r.HandleFunc("/subscribe", h.listSubscribe).Methods("GET")
+
 	r.HandleFunc("/subscribe", h.subscribe).Methods("POST")
 	r.HandleFunc("/subscribe/{id}", h.unsubscribe).Methods("DELETE")
 	r.HandleFunc("/dispatch", h.dispatch).Methods("POST")

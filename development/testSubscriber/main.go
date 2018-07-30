@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const serverUrl string = "http://127.0.0.1:8000"
+const serverUrl string = "http://pubsub:8000"
 
 func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("called")
@@ -26,8 +26,8 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/webhook", webhookHandler).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8001", r))
-	log.Println("dispatch now data ")
-	dispatch()
+	// log.Println("dispatch now data ")
+	// dispatch()
 	// unsubscribe(id.Id)
 }
 
@@ -70,7 +70,7 @@ func unsubscribe(id string) {
 }
 func subscribe() subscribeResult {
 	data := Subscribe{
-		Webhook: "http://127.0.0.1:8001/webhook",
+		Webhook: "http://subscriber:8001/webhook",
 	}
 	byteData, _ := json.Marshal(data)
 	reader := *bytes.NewReader(byteData)

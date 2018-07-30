@@ -7,7 +7,7 @@ RUN cd /go/src/github.com/fasibio/superEasyPubSub && go get && cd /go/src/github
 FROM alpine:3.5
 ARG version
 ARG buildNumber
-RUN mkdir /app 
+RUN mkdir /app && apk update && apk add tzdata
 COPY --from=build_go_env /src/bin/pubsub /app/
 ENV VERSION=${version}
 ENV BUILD_NUMBER=${buildNumber}

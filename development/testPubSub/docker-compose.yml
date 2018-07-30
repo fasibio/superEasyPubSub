@@ -1,5 +1,10 @@
 version: '3'
 services: 
+  subscriber:
+    restart: always
+    build: ../testSubscriber/.
+    expose:
+      - 8001
   pubsub: 
     restart: always
     build: ../../.

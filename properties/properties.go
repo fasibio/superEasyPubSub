@@ -1,11 +1,13 @@
 package properties
 
 import (
+	"log"
 	"os"
 )
 
 func GetTimezone() string {
 	result := os.Getenv("TIMEZONE")
+	log.Println("HIER", result == "")
 	if result == "" {
 		return "Europe/Berlin"
 	}
